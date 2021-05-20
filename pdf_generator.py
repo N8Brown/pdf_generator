@@ -6,15 +6,19 @@ Python Version: 3.9.2
 """
 
 import PyPDF2
-
-from os.path import basename
-from pathlib import Path
+import os
+from os import path
+from PIL import Image
 from tkinter import *
 from tkinter import filedialog
 
 
 # GLOBAL VARIABLES
 file_list = []
+converted_list = []
+
+home_dir = path.expanduser('~')
+temp_dir = home_dir + '/pdf_temp/'
 
 current_file_index = None
 current_file_dir = None
@@ -23,20 +27,16 @@ current_file_title = None
 
 # FUNCTIONS
 def add_files():
-    global file_list
+    global file_list, home_dir
 
-    files = filedialog.askopenfilenames(initialdir=Path.home(), filetypes=[("Compatible Files", "*.gif *.jpeg *.png *.doc *.docx"),("All Files", "*.*")])
+    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.png *.doc *.docx"),("All Files", "*.*")])
     
     if files:
         for file in files:
-            file_title = basename(file)
+            file_title = path.basename(file)
             file_list.append(dict(title=file_title, file_dir=file))
             file_listbox.insert(END, file_title)
-    
-    # Temporary testing
-    print(bool(files))
-    print(file_list)
-    
+        
 
 def delete_file():
     global file_list
@@ -50,18 +50,12 @@ def delete_file():
         file_listbox.activate(index[0])
         file_listbox.selection_set(index[0], last=None)
 
-    # Temporary testing
-    print(bool(index))
-
 
 def clear_list():
     global file_list
 
     file_list.clear()
     file_listbox.delete(0, END)
-
-    # Temporary testing
-    print(file_list)
 
 
 def move_up():
@@ -82,9 +76,6 @@ def move_up():
 
             file_listbox.activate(index-1)
             file_listbox.selection_set(index-1, last=None)
-
-        # Temporary testing
-        print(file_list)
 
 
 def move_down():
@@ -108,8 +99,46 @@ def move_down():
             file_listbox.activate(index+1)
             file_listbox.selection_set(index+1, last=None)
 
-        # Temporary testing
-        print(file_list)
+
+def convert_to_pdf():
+    global file_list, converted_list, temp_dir
+
+    if len(file_list) > 0:
+        if os.path.exists(temp_dir):
+            pass
+        else:
+            os.mkdir(temp_dir)
+
+        for file in file_list:
+            file_name = path.basename(file)
+            file_info = file_name.split('.')
+            new_file_name = file_info[0]+'.pdf'
+            converted_list.append(new_file_name)
+            open_file = Image.open(file)
+            open_file.save(temp_dir + new_file_name, "pdf")
+            open_file.close()
+
+    generate_pdf()
+
+
+def generate_pdf():
+    global converted_list, temp_dir
+
+    if len(converted_list) > 0:
+        merger = PyPDF2.PdfFileMerger()
+
+        for file in converted_list:
+            merger.append(temp_dir + file)
+
+        merger.write('test.pdf')
+        merger.close()
+
+        for file in converted_list:
+            os.remove(temp_dir + file)
+
+    if not os.listdir(temp_dir):
+        os.rmdir(temp_dir)
+
 
 
 # APPLICATION GUI
