@@ -4,13 +4,15 @@ Author: Nathan Brown
 Date Created: 05/19/2021
 Python Version: 3.9.2
 """
-
+import PIL.Image
 import PyPDF2
 import os
+import re
 from os import path
-from PIL import Image
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
+
 
 
 # GLOBAL VARIABLES
@@ -19,17 +21,14 @@ converted_list = []
 
 home_dir = path.expanduser('~')
 temp_dir = home_dir + '/pdf_temp/'
-
-current_file_index = None
-current_file_dir = None
-current_file_title = None
+output_dir = None
 
 
 # FUNCTIONS
 def add_files():
     global file_list, home_dir
 
-    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.png *.doc *.docx"),("All Files", "*.*")])
+    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.png *.doc *.docx")])
     
     if files:
         for file in files:
@@ -100,23 +99,54 @@ def move_down():
             file_listbox.selection_set(index+1, last=None)
 
 
+def get_output_directory():
+    global home_dir
+    new_file_destination.set(filedialog.askdirectory(initialdir=home_dir))
+
+
+def start_validation():
+    global file_list
+    if len(file_list) > 0:
+        validate_file_name()
+    else:
+        messagebox.showwarning('PDF Generator', 'Please add at least one file to convert to PDF.')
+
+
+def validate_file_name():
+    if new_file_name.get():
+        illegal_chars = re.compile('[*<>"?/\|:]')
+        if illegal_chars.search(new_file_name.get()):
+            messagebox.showerror('PDF Generator', 'File name cannot contain any of the following characters:\n\n | * " ? < > / \\ :\n\nPlease correct and try again.')
+            print("File name is BAD")
+        else:
+            validate_directory()
+    else:
+        messagebox.showwarning('PDF Generator', 'Please enter a valid file name.\n\nFile name cannot contain any of the following characters:\n\n | * " ? < > / \\ :\n ')
+
+
+def validate_directory():
+    if new_file_destination.get():
+        convert_to_pdf()
+    else:
+        messagebox.showwarning('PDF Generator', 'Please choose an output desitination for the file.')
+
 def convert_to_pdf():
     global file_list, converted_list, temp_dir
 
-    if len(file_list) > 0:
-        if os.path.exists(temp_dir):
-            pass
-        else:
-            os.mkdir(temp_dir)
+    if os.path.exists(temp_dir):
+        pass
+    else:
+        os.mkdir(temp_dir)
 
-        for file in file_list:
-            file_name = path.basename(file)
-            file_info = file_name.split('.')
-            new_file_name = file_info[0]+'.pdf'
-            converted_list.append(new_file_name)
-            open_file = Image.open(file)
-            open_file.save(temp_dir + new_file_name, "pdf")
-            open_file.close()
+    for file in file_list:
+        # file_name = path.basename(file)
+        file_name = file['title'].split('.')[0]
+        # file_info = file_name.split('.')
+        new_file_name = file_name + '.pdf'
+        converted_list.append(new_file_name)
+        open_file = PIL.Image.open(file['file_dir'])
+        open_file.save(temp_dir + new_file_name, "pdf")
+        open_file.close()
 
     generate_pdf()
 
@@ -130,7 +160,7 @@ def generate_pdf():
         for file in converted_list:
             merger.append(temp_dir + file)
 
-        merger.write('test.pdf')
+        merger.write(new_file_destination.get() + "/" + new_file_name.get() + ".pdf")
         merger.close()
 
         for file in converted_list:
@@ -139,6 +169,11 @@ def generate_pdf():
     if not os.listdir(temp_dir):
         os.rmdir(temp_dir)
 
+    messagebox.showinfo('PDF Generator', 'File ' + new_file_name.get() + ' was created successfully.\n\nFile can be found here:\n\n' + new_file_destination.get())
+    
+    new_file_name.set('')
+    new_file_destination.set('')
+    
 
 
 # APPLICATION GUI
@@ -147,64 +182,62 @@ root.geometry('600x400')
 root.title('PDF Generator')
 
 # GUI frames
-main_frame = Frame(root)
+main_frame = LabelFrame(root, text='Files to Convert')
 main_frame.pack(pady=10)
 
-files_controls_frame = LabelFrame(main_frame, text='File Controls')
-files_controls_frame.grid(row=0, column=0, padx=25)
+files_controls_frame = Frame(main_frame)
+files_controls_frame.grid(row=0, column=0, pady=[5,0], padx=10, sticky=NW)
 
-files_list_frame = LabelFrame(main_frame, text='File List')
-files_list_frame.grid(row=0, column=1, padx=25)
+files_list_frame = Frame(main_frame)
+files_list_frame.grid(row=0, column=1)
 
-list_controls_frame = Frame(files_list_frame)
+list_controls_frame = LabelFrame(files_list_frame, text='Move')
 list_controls_frame.grid(row=0, column=1)
 
-output_frame = LabelFrame(root, text='Output')
+output_frame = LabelFrame(root, text='Output', width=80)
 output_frame.pack(pady=10)
 
 file_output_frame = Frame(output_frame, padx=10, pady=10)
 file_output_frame.grid(row=0, column=0)
 
-
 # Control buttons for the files_controls_frame
-add_file_button = Button(files_controls_frame, text='Add File(s)', command=add_files)
-add_file_button.pack(padx=10, pady=10)
+add_file_button = Button(files_controls_frame, text='Add File(s)', command=add_files, width=10)
+add_file_button.pack(pady=5)
 
-delete_file_button = Button(files_controls_frame, text='Delete File', command=delete_file)
-delete_file_button.pack(padx=10, pady=10)
+delete_file_button = Button(files_controls_frame, text='Delete File', command=delete_file, width=10)
+delete_file_button.pack(pady=5)
 
-clear_list_button = Button(files_controls_frame, text='Clear List', command=clear_list)
-clear_list_button.pack(padx=10, pady=10)
+clear_list_button = Button(files_controls_frame, text='Clear List', command=clear_list, width=10)
+clear_list_button.pack(pady=5)
 
 # File listbox and list order controls for the files_list_frame
 file_listbox = Listbox(files_list_frame, width=40)
-file_listbox.grid(row=0, column=0, padx=10, pady=10)
+file_listbox.grid(row=0, column=0, pady=10)
 
 list_control_up = Button(list_controls_frame, text='Up', command=move_up)
-list_control_up.pack(padx=10, pady=10)
+list_control_up.pack(pady=10)
 
 list_control_down = Button(list_controls_frame, text='Down', command=move_down)
-list_control_down.pack(padx=10, pady=10)
+list_control_down.pack(pady=10)
 
 # Label and entry box for file_name_frame
 file_name_label = Label(file_output_frame, text='File Name: ')
-file_name_label.grid(row=0, column=0)
+file_name_label.grid(row=0, column=0, pady=5)
 
 new_file_name = StringVar()
-file_name_entry = Entry(file_output_frame, textvariable=new_file_name)
-file_name_entry.grid(row=0, column=1)
+file_name_entry = Entry(file_output_frame, textvariable=new_file_name, width=50)
+file_name_entry.grid(row=0, column=1, columnspan=2, pady=5)
 
 # Label, entry, and browse button for file_destination_frame
-file_destination_label = Label(file_output_frame, text='Destination: ')
-file_destination_label.grid(row=1, column=0)
+file_destination_browse = Button(file_output_frame, text='Save To', command=get_output_directory)
+file_destination_browse.grid(row=1, column=0, pady=5)
 
 new_file_destination = StringVar()
-file_destination_entry = Entry(file_output_frame, textvariable=new_file_destination)
-file_destination_entry.grid(row=1, column=1)
+file_destination_entry = Entry(file_output_frame, textvariable=new_file_destination, state=DISABLED, width=50)
+file_destination_entry.grid(row=1, column=1, columnspan=2, pady=5)
 
-file_destination_browse = Button(file_output_frame, text='Browse')
-file_destination_browse.grid(row=1, column=2)
-
+generate_pdf_button = Button(file_output_frame, text='Generate PDF', command=start_validation)
+generate_pdf_button.grid(row=2, column=2, pady=10, sticky=SE)
 
 
 
