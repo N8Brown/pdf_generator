@@ -1,5 +1,6 @@
 """
 File Name: pdf_generator.py
+Version: 1.0
 Author: Nathan Brown
 Date Created: 05/19/2021
 Python Version: 3.9.2
@@ -76,6 +77,8 @@ def move_up():
             file_listbox.activate(index-1)
             file_listbox.selection_set(index-1, last=None)
 
+        file_listbox.yview_moveto((index-1)/len(file_list))
+
 
 def move_down():
     global file_list
@@ -97,6 +100,8 @@ def move_down():
 
             file_listbox.activate(index+1)
             file_listbox.selection_set(index+1, last=None)
+
+        file_listbox.yview_moveto((index+1)/len(file_list))
 
 
 def get_output_directory():
@@ -178,26 +183,40 @@ def generate_pdf():
 
 # APPLICATION GUI
 root = Tk()
-root.geometry('600x400')
+root.geometry('630x480')
 root.title('PDF Generator')
-app_icon = PhotoImage(file='./pdf-generator-icon.png')
+app_icon = PhotoImage(file='assets/logo.png')
 root.iconphoto(False, app_icon)
 
 # GUI frames
-main_frame = LabelFrame(root, text='Files to Convert')
-main_frame.pack(pady=10)
 
-files_controls_frame = Frame(main_frame)
-files_controls_frame.grid(row=0, column=0, pady=[5,0], padx=10, sticky=NW)
+main_frame_1 = Frame(root)
+main_frame_1.pack(pady=20, anchor=W)
 
-files_list_frame = Frame(main_frame)
-files_list_frame.grid(row=0, column=1)
+logo_frame = Frame(main_frame_1)
+logo_frame.grid(row=0, column=0)
+
+files_frame = LabelFrame(main_frame_1, text='Files to Convert')
+files_frame.grid(row=0, column=1, sticky=NE)
+
+logo = PhotoImage(file='assets/logo.png')
+logo_label = Label(logo_frame, image=logo)
+logo_label.pack(padx= [20, 20], pady=20)
+
+files_controls_frame = Frame(files_frame)
+files_controls_frame.grid(row=0, column=1, pady=[5,0], padx=10, sticky=NW)
+
+files_list_frame = Frame(files_frame)
+files_list_frame.grid(row=0, column=2)
+
+list_components_frame = Frame(files_list_frame)
+list_components_frame.grid(row=0, column=0, pady=[0, 10])
 
 list_controls_frame = LabelFrame(files_list_frame, text='Move')
-list_controls_frame.grid(row=0, column=1)
+list_controls_frame.grid(row=0, column=1, padx=10)
 
-output_frame = LabelFrame(root, text='Output', width=80)
-output_frame.pack(pady=10)
+output_frame = LabelFrame(root, text='Output')
+output_frame.pack(padx=25, pady=10, anchor=W)
 
 file_output_frame = Frame(output_frame, padx=10, pady=10)
 file_output_frame.grid(row=0, column=0)
@@ -213,13 +232,23 @@ clear_list_button = Button(files_controls_frame, text='Clear List', command=clea
 clear_list_button.pack(pady=5)
 
 # File listbox and list order controls for the files_list_frame
-file_listbox = Listbox(files_list_frame, width=40)
-file_listbox.grid(row=0, column=0, pady=10)
+file_listbox = Listbox(list_components_frame, width=45)
+file_listbox.pack(pady=10, side=LEFT, fill=BOTH)
 
-list_control_up = Button(list_controls_frame, text='Up', command=move_up)
+listbox_scrollbar = Scrollbar(list_components_frame)
+listbox_scrollbar.pack(pady=10, side=RIGHT, fill=BOTH)
+
+file_listbox.config(yscrollcommand=listbox_scrollbar.set)
+listbox_scrollbar.config(command=file_listbox.yview)
+
+
+up_arrow = PhotoImage(file='assets/arrow-up.png')
+down_arrow = PhotoImage(file='assets/arrow-down.png')
+
+list_control_up = Button(list_controls_frame,image=up_arrow, command=move_up)
 list_control_up.pack(pady=10)
 
-list_control_down = Button(list_controls_frame, text='Down', command=move_down)
+list_control_down = Button(list_controls_frame, image=down_arrow, command=move_down)
 list_control_down.pack(pady=10)
 
 # Label and entry box for file_name_frame
@@ -227,7 +256,7 @@ file_name_label = Label(file_output_frame, text='File Name: ')
 file_name_label.grid(row=0, column=0, pady=5)
 
 new_file_name = StringVar()
-file_name_entry = Entry(file_output_frame, textvariable=new_file_name, width=50)
+file_name_entry = Entry(file_output_frame, textvariable=new_file_name, width=81)
 file_name_entry.grid(row=0, column=1, columnspan=2, pady=5)
 
 # Label, entry, and browse button for file_destination_frame
@@ -235,12 +264,15 @@ file_destination_browse = Button(file_output_frame, text='Save To', command=get_
 file_destination_browse.grid(row=1, column=0, pady=5)
 
 new_file_destination = StringVar()
-file_destination_entry = Entry(file_output_frame, textvariable=new_file_destination, state=DISABLED, width=50)
+file_destination_entry = Entry(file_output_frame, textvariable=new_file_destination, state=DISABLED, width=81)
 file_destination_entry.grid(row=1, column=1, columnspan=2, pady=5)
 
 generate_pdf_button = Button(file_output_frame, text='Generate PDF', command=start_validation)
 generate_pdf_button.grid(row=2, column=2, pady=10, sticky=SE)
 
-
+# Copyright Label
+copyright_symbol = u"\u00A9"
+copyright_label = Label(root, text=copyright_symbol +' 2021 Nathan Brown')
+copyright_label.pack(pady=[0, 10], side=BOTTOM)
 
 root.mainloop()
