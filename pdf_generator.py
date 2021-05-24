@@ -180,6 +180,8 @@ def generate_pdf():
 root = Tk()
 root.geometry('600x400')
 root.title('PDF Generator')
+app_icon = PhotoImage(file='./pdf-generator-icon.png')
+root.iconphoto(False, app_icon)
 
 # GUI frames
 main_frame = LabelFrame(root, text='Files to Convert')
