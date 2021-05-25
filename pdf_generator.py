@@ -1,6 +1,6 @@
 """
 File Name: pdf_generator.py
-Version: 1.0
+Version: 1.0.0
 Author: Nathan Brown
 Date Created: 05/19/2021
 Python Version: 3.9.2
