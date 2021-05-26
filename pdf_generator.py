@@ -29,7 +29,7 @@ output_dir = None
 def add_files():
     global file_list, home_dir
 
-    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.png *.doc *.docx")])
+    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.png")])
     
     if files:
         for file in files:
