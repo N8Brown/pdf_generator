@@ -206,6 +206,20 @@ root.title('PDF Generator')
 app_icon = PhotoImage(file='assets/logo.png')
 root.iconphoto(False, app_icon)
 
+# GUI Window Menus
+main_menu = Menu(root)
+root.config(menu=main_menu)
+
+file_menu = Menu(main_menu, tearoff=0)
+main_menu.add_cascade(label='File', menu=file_menu)
+file_menu.add_command(label='Add File(s)', command=add_files)
+file_menu.add_separator()
+file_menu.add_command(label='Exit', command=root.destroy)
+
+help_menu = Menu(main_menu, tearoff=0)
+main_menu.add_cascade(label='Help', menu=help_menu)
+help_menu.add_command(label='About')
+
 # GUI frames
 
 main_frame_1 = Frame(root)
