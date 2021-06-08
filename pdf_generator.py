@@ -10,6 +10,7 @@ import PIL.Image
 import PyPDF2
 import os
 import re
+import shutil
 from fpdf import FPDF
 from os import path
 from tkinter import *
@@ -30,7 +31,7 @@ output_dir = None
 def add_files():
     global file_list, home_dir
 
-    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.png *.txt"),("Image Files", "*.gif *.jpeg *.jpg *.png"),("Text Files", "*.txt")])
+    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.pdf *.png *.txt"),("Image Files", "*.gif *.jpeg *.jpg *.png"),("Text Files", "*.pdf *.txt")])
     
     if files:
         for file in files:
@@ -163,6 +164,8 @@ def convert_to_pdf():
 
         if file_type == 'txt':
             text_to_pdf(file, new_file_name)
+        elif file_type == 'pdf':
+            shutil.copy(file['file_dir'], temp_dir + file['title'])
         else:
             open_file = PIL.Image.open(file['file_dir'])
             open_file.save(temp_dir + new_file_name, "pdf")
