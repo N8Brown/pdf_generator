@@ -1,14 +1,17 @@
 """
 File Name: pdf_generator.py
-Version: 1.0.0
+Version: 1.1.0
 Author: Nathan Brown
-Date Created: 05/19/2021
+Version Created: 06/07/2021
+Application Created: 05/19/2021
 Python Version: 3.9.2
 """
 import PIL.Image
 import PyPDF2
 import os
 import re
+import shutil
+from fpdf import FPDF
 from os import path
 from tkinter import *
 from tkinter import filedialog
@@ -19,7 +22,6 @@ from tkinter import messagebox
 # GLOBAL VARIABLES
 file_list = []
 converted_list = []
-
 home_dir = path.expanduser('~')
 temp_dir = home_dir + '/pdf_temp/'
 output_dir = None
@@ -29,7 +31,7 @@ output_dir = None
 def add_files():
     global file_list, home_dir
 
-    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.png")])
+    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.pdf *.png *.txt"),("Image Files", "*.gif *.jpeg *.jpg *.png"),("Text Files", "*.pdf *.txt")])
     
     if files:
         for file in files:
@@ -109,6 +111,18 @@ def get_output_directory():
     new_file_destination.set(filedialog.askdirectory(initialdir=home_dir))
 
 
+def text_to_pdf(file, new_file_name):
+    global temp_dir
+    text = open(file['file_dir'], "r")
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    for line in text:
+        pdf.cell(200, 10, txt=line, ln=1, align='L')
+
+    pdf.output(temp_dir + new_file_name)
+
 def start_validation():
     global file_list
     if len(file_list) > 0:
@@ -122,7 +136,6 @@ def validate_file_name():
         illegal_chars = re.compile('[*<>"?/\|:]')
         if illegal_chars.search(new_file_name.get()):
             messagebox.showerror('PDF Generator', 'File name cannot contain any of the following characters:\n\n | * " ? < > / \\ :\n\nPlease correct and try again.')
-            print("File name is BAD")
         else:
             validate_directory()
     else:
@@ -144,14 +157,19 @@ def convert_to_pdf():
         os.mkdir(temp_dir)
 
     for file in file_list:
-        # file_name = path.basename(file)
         file_name = file['title'].split('.')[0]
-        # file_info = file_name.split('.')
+        file_type = file['title'].split('.')[1]
         new_file_name = file_name + '.pdf'
         converted_list.append(new_file_name)
-        open_file = PIL.Image.open(file['file_dir'])
-        open_file.save(temp_dir + new_file_name, "pdf")
-        open_file.close()
+
+        if file_type == 'txt':
+            text_to_pdf(file, new_file_name)
+        elif file_type == 'pdf':
+            shutil.copy(file['file_dir'], temp_dir + file['title'])
+        else:
+            open_file = PIL.Image.open(file['file_dir'])
+            open_file.save(temp_dir + new_file_name, "pdf")
+            open_file.close()
 
     generate_pdf()
 
@@ -174,7 +192,7 @@ def generate_pdf():
     if not os.listdir(temp_dir):
         os.rmdir(temp_dir)
 
-    messagebox.showinfo('PDF Generator', 'File ' + new_file_name.get() + ' was created successfully.\n\nFile can be found here:\n\n' + new_file_destination.get())
+    messagebox.showinfo('PDF Generator', 'File "' + new_file_name.get() + '" was created successfully and saved to:\n\n' + new_file_destination.get())
     
     new_file_name.set('')
     new_file_destination.set('')
