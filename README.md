@@ -1,4 +1,4 @@
-# PDF Generator v1.1.0
+# PDF Generator v1.1.1
 A simple Python application with a Tkinter graphical user interface that allows the user to merge multiple compatible file types into a single PDF. 
 
 ## Technologies
