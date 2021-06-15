@@ -1,6 +1,6 @@
 """
 File Name: pdf_generator.py
-Version: 1.1.1
+Version: 1.2.0
 Author: Nathan Brown
 Version Created: 06/15/2021
 Application Created: 05/19/2021
@@ -11,6 +11,7 @@ import PyPDF2
 import os
 import re
 import shutil
+from docx2pdf import convert
 from fpdf import FPDF
 from os import path
 from tkinter import *
@@ -31,7 +32,7 @@ output_dir = None
 def add_files():
     global file_list, home_dir
 
-    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.pdf *.png *.txt"),("Image Files", "*.gif *.jpeg *.jpg *.png"),("Text Files", "*.pdf *.txt")])
+    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.docx *.gif *.jpeg *.jpg *.pdf *.png *.txt"),("Image Files", "*.gif *.jpeg *.jpg *.png"),("Text Files", "*.docx *.pdf *.txt")])
     
     if files:
         for file in files:
@@ -164,6 +165,8 @@ def convert_to_pdf():
 
         if file_type == 'txt':
             text_to_pdf(file, new_file_name)
+        elif file_type == 'docx':
+            convert(file['file_dir'], temp_dir + new_file_name)
         elif file_type == 'pdf':
             shutil.copy(file['file_dir'], temp_dir + file['title'])
         else:
