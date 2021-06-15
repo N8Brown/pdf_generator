@@ -1,8 +1,8 @@
 """
 File Name: pdf_generator.py
-Version: 1.1.0
+Version: 1.1.1
 Author: Nathan Brown
-Version Created: 06/07/2021
+Version Created: 06/15/2021
 Application Created: 05/19/2021
 Python Version: 3.9.2
 """
@@ -198,6 +198,17 @@ def generate_pdf():
     new_file_destination.set('')
     
 
+def about():
+    messagebox.showinfo(
+        'PDF Generator',
+        'PDF GENERATOR\n\n'+
+        'Version: 1.1.1\n'+
+        'Release Date: 2021-06-15\n'+
+        'Author: Nathan Brown\n\n'+
+        'https://github.com/N8Brown/pdf_generator\n\n'+
+        u'\u00A9' + ' 2021'
+    )
+
 
 # APPLICATION GUI
 root = Tk()
@@ -205,6 +216,20 @@ root.geometry('630x480')
 root.title('PDF Generator')
 app_icon = PhotoImage(file='assets/logo.png')
 root.iconphoto(False, app_icon)
+
+# GUI Window Menus
+main_menu = Menu(root)
+root.config(menu=main_menu)
+
+file_menu = Menu(main_menu, tearoff=0)
+main_menu.add_cascade(label='File', menu=file_menu)
+file_menu.add_command(label='Add File(s)', command=add_files)
+file_menu.add_separator()
+file_menu.add_command(label='Exit', command=root.destroy)
+
+help_menu = Menu(main_menu, tearoff=0)
+main_menu.add_cascade(label='Help', menu=help_menu)
+help_menu.add_command(label='About', command=about)
 
 # GUI frames
 
@@ -288,9 +313,8 @@ file_destination_entry.grid(row=1, column=1, columnspan=2, pady=5)
 generate_pdf_button = Button(file_output_frame, text='Generate PDF', command=start_validation)
 generate_pdf_button.grid(row=2, column=2, pady=10, sticky=SE)
 
-# Copyright Label
-copyright_symbol = u"\u00A9"
-copyright_label = Label(root, text=copyright_symbol +' 2021 Nathan Brown')
-copyright_label.pack(pady=[0, 10], side=BOTTOM)
+
+
+
 
 root.mainloop()
