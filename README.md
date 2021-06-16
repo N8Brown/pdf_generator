@@ -11,8 +11,8 @@ Current compatible file types include:
 * .jpg
 * .jpeg
 * .png
-<br/>
-<br/>
+
+
 ## Installation
 * Download the repository as ZIP or clone the repository to the preferred location on your computer: 
 ```sh
@@ -56,8 +56,8 @@ pyinstaller --onefile --windowed --icon=assets/logo.ico pdf_generator.py
 ```
 
 * NOTE: Refer to [Pyinstaller documentation](https://www.pyinstaller.org/documentation.html) for operating system specific information
-<br/>
-<br/>
+
+
 ## Release History
 * 1.2.0
     * CHANGE: Update ``convert_to_pdf()`` to include support for handling .docx files
@@ -72,8 +72,8 @@ pyinstaller --onefile --windowed --icon=assets/logo.ico pdf_generator.py
     * CHANGE: Update ``convert_to_pdf()`` to include support for handling .txt and .pdf files
 * 1.0.0
     * Initial release
-<br/>
-<br/>
+
+
 ## Meta
 [Nathan Brown](https://www.nathanabrown.com) - [@_N8_Brown](https://twitter.com/_N8_Brown) - contact@nathanabrown.com 
 
