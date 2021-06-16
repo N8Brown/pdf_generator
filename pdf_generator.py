@@ -1,8 +1,8 @@
 """
 File Name: pdf_generator.py
-Version: 1.1.1
+Version: 1.2.0
 Author: Nathan Brown
-Version Created: 06/15/2021
+Version Created: 06/16/2021
 Application Created: 05/19/2021
 Python Version: 3.9.2
 """
@@ -11,6 +11,7 @@ import PyPDF2
 import os
 import re
 import shutil
+from docx2pdf import convert
 from fpdf import FPDF
 from os import path
 from tkinter import *
@@ -31,7 +32,7 @@ output_dir = None
 def add_files():
     global file_list, home_dir
 
-    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.gif *.jpeg *.jpg *.pdf *.png *.txt"),("Image Files", "*.gif *.jpeg *.jpg *.png"),("Text Files", "*.pdf *.txt")])
+    files = filedialog.askopenfilenames(initialdir=home_dir, filetypes=[("Compatible Files", "*.docx *.gif *.jpeg *.jpg *.pdf *.png *.txt"),("Image Files", "*.gif *.jpeg *.jpg *.png"),("Text Files", "*.docx *.pdf *.txt")])
     
     if files:
         for file in files:
@@ -111,18 +112,6 @@ def get_output_directory():
     new_file_destination.set(filedialog.askdirectory(initialdir=home_dir))
 
 
-def text_to_pdf(file, new_file_name):
-    global temp_dir
-    text = open(file['file_dir'], "r")
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    for line in text:
-        pdf.cell(200, 10, txt=line, ln=1, align='L')
-
-    pdf.output(temp_dir + new_file_name)
-
 def start_validation():
     global file_list
     if len(file_list) > 0:
@@ -163,9 +152,32 @@ def convert_to_pdf():
         converted_list.append(new_file_name)
 
         if file_type == 'txt':
-            text_to_pdf(file, new_file_name)
+            try:
+                text = open(file['file_dir'], "r")
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Arial", size=12)
+
+                for line in text:
+                    pdf.cell(200, 10, txt=line, ln=1, align='L')
+
+                pdf.output(temp_dir + new_file_name)
+            except:
+                messagebox.showerror('PDF Generator', 
+                'There was an error converting\n\n' + 
+                file['title'] + '\n\n' +
+                'This file will be skipped')
+
+        elif file_type == 'docx':
+            try:
+                convert(file['file_dir'], temp_dir + new_file_name)
+            except:
+                messagebox.showerror('PDF Generator', 
+                'There was an error converting\n\n' + file['title'] + '\n\n' + 'Please ensure that Word is installed and the file is not corrupt.\n\nThis file will be skipped.')
+
         elif file_type == 'pdf':
             shutil.copy(file['file_dir'], temp_dir + file['title'])
+
         else:
             open_file = PIL.Image.open(file['file_dir'])
             open_file.save(temp_dir + new_file_name, "pdf")
@@ -202,8 +214,8 @@ def about():
     messagebox.showinfo(
         'PDF Generator',
         'PDF GENERATOR\n\n'+
-        'Version: 1.1.1\n'+
-        'Release Date: 2021-06-15\n'+
+        'Version: 1.2.0\n'+
+        'Release Date: 2021-06-16\n'+
         'Author: Nathan Brown\n\n'+
         'https://github.com/N8Brown/pdf_generator\n\n'+
         u'\u00A9' + ' 2021'

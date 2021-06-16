@@ -1,4 +1,5 @@
 altgraph==0.17
+docx2pdf==0.1.7
 fpdf==1.7.2
 future==0.18.2
 pefile==2021.5.24
@@ -6,4 +7,6 @@ Pillow==8.2.0
 pyinstaller==4.3
 pyinstaller-hooks-contrib==2021.1
 PyPDF2==1.26.0
+pywin32==227
 pywin32-ctypes==0.2.0
+tqdm==4.61.1
